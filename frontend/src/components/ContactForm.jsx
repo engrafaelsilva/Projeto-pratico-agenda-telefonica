@@ -2,17 +2,20 @@ import React, { useState, useEffect } from "react";
 import { PlusCircle, Trash2 } from "lucide-react";
 import { applyPhoneMask } from "../utils/phoneMask";
 
+const API_URL = "http://localhost:3000/api/contatos"; // 🔗 seu backend
+
 const ContactForm = ({ onSave, onClose, contactToEdit }) => {
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [phones, setPhones] = useState([""]);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (contactToEdit) {
-      setName(contactToEdit.name);
-      setAge(contactToEdit.age.toString());
-      setPhones(contactToEdit.phones.length > 0 ? contactToEdit.phones : [""]);
+      setName(contactToEdit.nome);
+      setAge(contactToEdit.idade.toString());
+      setPhones(contactToEdit.telefones?.length > 0 ? contactToEdit.telefones : [""]);
     } else {
       setName("");
       setAge("");
@@ -27,66 +30,50 @@ const ContactForm = ({ onSave, onClose, contactToEdit }) => {
     setPhones(newPhones);
   };
 
-  const addPhoneInput = () => {
-    setPhones([...phones, ""]);
-  };
+  const addPhoneInput = () => setPhones([...phones, ""]);
 
   const removePhoneInput = (index) => {
-    if (phones.length > 1) {
-      setPhones(phones.filter((_, i) => i !== index));
-    }
+    if (phones.length > 1) setPhones(phones.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Funcionalidade de salvar contato desativada temporariamente.");
-    return;
-    // setError("");
 
-    // if (!name.trim() || !age.trim())
-    //   return setError("Nome e idade obrigatórios");
-    // if (isNaN(parseInt(age)) || parseInt(age) <= 0)
-    //   return setError("Idade inválida");
+    if (!name.trim() || !age.trim() || phones.some((p) => !p.trim())) {
+      setError("Preencha todos os campos antes de salvar.");
+      return;
+    }
 
-    // const validPhones = phones.map((p) => p.trim()).filter(Boolean);
-    // if (validPhones.length === 0)
-    //   return setError("É necessário ao menos um telefone");
+    setError("");
+    setLoading(true);
 
-    // // const contactData = { name, age: parseInt(age) };
-    // const contactData = { nome: name, idade: parseInt(age) };
+    try {
+      const payload = {
+        nome: name.trim(),
+        idade: parseInt(age, 10),
+        telefones: phones.map((p) => p.replace(/\D/g, "")),
+      };
 
-    // try {
-    //   // Cria o contato
-    //   const response = await fetch("http://localhost:3000/contatos/criar", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify(contactData),
-    //   });
+      const method = contactToEdit ? "PUT" : "POST";
+      const url = contactToEdit ? `${API_URL}/contatos/criar${contactToEdit.id}` : API_URL;
 
-    //   if (!response.ok) {
-    //     const errData = await response.json();
-    //     return setError(errData.error || "Erro ao salvar contato");
-    //   }
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    //   const savedContact = await response.json();
+      if (!res.ok) throw new Error("Erro ao salvar contato.");
 
-    //   // Salva os telefones
-    //   await Promise.all(
-    //     validPhones.map((numero) =>
-    //       fetch("http://localhost:3000/telefones", {
-    //         method: "POST",
-    //         headers: { "Content-Type": "application/json" },
-    //         body: JSON.stringify({ idContato: savedContact.id, numero }),
-    //       })
-    //     )
-    //   );
-
-    //   onSave(savedContact);
-    //   onClose();
-    // } catch (err) {
-    //   console.error(err);
-    //   setError("Erro ao conectar com o servidor");
-    // }
+      await res.json();
+      onSave(); // recarrega lista no componente pai
+      onClose(); // fecha o modal
+    } catch (err) {
+      console.error(err);
+      setError("Erro ao salvar contato. Verifique o servidor.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -94,14 +81,13 @@ const ContactForm = ({ onSave, onClose, contactToEdit }) => {
       <h2 className="text-2xl font-bold text-gray-800 mb-4">
         {contactToEdit ? "Editar Contato" : "Novo Contato"}
       </h2>
+
       {error && (
         <p className="text-red-500 text-sm bg-red-50 p-2 rounded-md">{error}</p>
       )}
+
       <div>
-        <label
-          htmlFor="name"
-          className="block text-sm font-medium text-gray-700"
-        >
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
           Nome
         </label>
         <input
@@ -113,11 +99,9 @@ const ContactForm = ({ onSave, onClose, contactToEdit }) => {
           required
         />
       </div>
+
       <div>
-        <label
-          htmlFor="age"
-          className="block text-sm font-medium text-gray-700"
-        >
+        <label htmlFor="age" className="block text-sm font-medium text-gray-700">
           Idade
         </label>
         <input
@@ -129,6 +113,7 @@ const ContactForm = ({ onSave, onClose, contactToEdit }) => {
           required
         />
       </div>
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Telefone(s)
@@ -157,6 +142,7 @@ const ContactForm = ({ onSave, onClose, contactToEdit }) => {
             </div>
           ))}
         </div>
+
         <button
           type="button"
           onClick={addPhoneInput}
@@ -166,6 +152,7 @@ const ContactForm = ({ onSave, onClose, contactToEdit }) => {
           Adicionar outro telefone
         </button>
       </div>
+
       <div className="flex justify-end gap-3 pt-4 border-t mt-6">
         <button
           type="button"
@@ -175,11 +162,15 @@ const ContactForm = ({ onSave, onClose, contactToEdit }) => {
           Cancelar
         </button>
         <button
-          onClick={handleSubmit}
           type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          disabled={loading}
+          className={`px-4 py-2 rounded-lg text-white transition-colors ${
+            loading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
+          }`}
         >
-          Salvar
+          {loading ? "Salvando..." : "Salvar"}
         </button>
       </div>
     </form>
