@@ -1,4 +1,4 @@
-import pool from '../database/configDb.js';
+import pool  from '../database/configDb.js';
 
 export const createContato = async (nome, idade, telefones) =>{
   if (typeof nome !== 'string' || !nome.trim()) throw new Error('Nome inválido');
@@ -84,6 +84,9 @@ export const searchContatos = async (q) => {
 };
 
 export const updateContato = async (id, nome, idade, telefones) => {
+  const telefonesClean = telefones.map((t) => String(t).replace(/\D/g, '')).filter((t) => t.length > 0);
+  if (telefonesClean.length === 0) throw new Error('Nenhum telefone válido informado');
+
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -91,7 +94,7 @@ export const updateContato = async (id, nome, idade, telefones) => {
     await client.query('UPDATE contato SET nome=$1, idade=$2 WHERE id=$3', [nome, idade, id]);
     await client.query('DELETE FROM telefone WHERE idcontato=$1', [id]);
 
-    for (const numero of telefones) {
+    for (const numero of telefonesClean) {
       await client.query('INSERT INTO telefone (idcontato, numero) VALUES ($1, $2)', [id, numero]);
     }
 

@@ -9,7 +9,7 @@ import{
 
 const router = express.Router();
 
-router.post('/criar', addContato);
+router.post('/criarcontato', addContato);
 router.get('/listar', listContatos);
 router.get('/buscar', searchContato);
 router.put('/editar/:id', editContato);

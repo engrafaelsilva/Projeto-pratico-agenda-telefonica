@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { PlusCircle, Trash2 } from "lucide-react";
 import { applyPhoneMask } from "../utils/phoneMask";
 
-const API_URL = "http://localhost:3000/api/contatos"; // 🔗 seu backend
+const API_URL = "http://localhost:3000/api/contatos/criar";
 
 const ContactForm = ({ onSave, onClose, contactToEdit }) => {
   const [name, setName] = useState("");
@@ -15,7 +15,9 @@ const ContactForm = ({ onSave, onClose, contactToEdit }) => {
     if (contactToEdit) {
       setName(contactToEdit.nome);
       setAge(contactToEdit.idade.toString());
-      setPhones(contactToEdit.telefones?.length > 0 ? contactToEdit.telefones : [""]);
+      setPhones(
+        contactToEdit.telefones?.length > 0 ? contactToEdit.telefones : [""]
+      );
     } else {
       setName("");
       setAge("");
@@ -38,41 +40,21 @@ const ContactForm = ({ onSave, onClose, contactToEdit }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!name.trim() || !age.trim() || phones.some((p) => !p.trim())) {
-      setError("Preencha todos os campos antes de salvar.");
-      return;
-    }
-
-    setError("");
-    setLoading(true);
-
+    const payload = { nome: name, idade: age, telefones: phones };
     try {
-      const payload = {
-        nome: name.trim(),
-        idade: parseInt(age, 10),
-        telefones: phones.map((p) => p.replace(/\D/g, "")),
-      };
-
-      const method = contactToEdit ? "PUT" : "POST";
-      const url = contactToEdit ? `${API_URL}/contatos/criar${contactToEdit.id}` : API_URL;
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) throw new Error("Erro ao salvar contato.");
-
-      await res.json();
-      onSave(); // recarrega lista no componente pai
-      onClose(); // fecha o modal
+      if (contatoEdit?.id) {
+        await axios.put(
+          `http://localhost:3000/criarcontato/${contato.id}`,
+          payload
+        );
+        alert("Contato atualizado com sucesso!");
+      } else {
+        await axios.post("http://localhost:3000/api/contatos/buscar", payload);
+        alert("Contato criado com sucesso!");
+      }
+      onSuccess();
     } catch (err) {
       console.error(err);
-      setError("Erro ao salvar contato. Verifique o servidor.");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -87,7 +69,10 @@ const ContactForm = ({ onSave, onClose, contactToEdit }) => {
       )}
 
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="name"
+          className="block text-sm font-medium text-gray-700"
+        >
           Nome
         </label>
         <input
@@ -101,7 +86,10 @@ const ContactForm = ({ onSave, onClose, contactToEdit }) => {
       </div>
 
       <div>
-        <label htmlFor="age" className="block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="age"
+          className="block text-sm font-medium text-gray-700"
+        >
           Idade
         </label>
         <input

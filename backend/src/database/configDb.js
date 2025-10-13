@@ -22,5 +22,4 @@ export const testConnection = async () => {
   }
 };
 
-// Exporta o pool também (caso outros módulos precisem)
 export default pool;
