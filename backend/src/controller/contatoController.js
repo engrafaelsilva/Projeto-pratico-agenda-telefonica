@@ -1,69 +1,187 @@
-import fs from 'fs';
+// import fs from 'fs';
+// import {
+//   createContato,
+//   getContatos,
+//   searchContatos,
+//   updateContato,
+//   deleteContato
+// } from '../models/contatoModel.js';
+
+// export const addContato = async (req, res) => {
+//   const { nome, idade, telefones } = req.body;
+//   try {
+//     const id = await createContato(nome, idade, telefones);
+//     console.log(`[OK] Contato criado com sucesso! ID: ${id}`);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Erro ao criar contato.' });
+//   }
+// };
+
+// export const listContatos = async (req, res) => {
+//   try {
+//     const contatos = await getContatos(nome, idade, telefones);
+//     res.status(201).json({ message: 'Contatos listados com sucesso!', id });
+//     res.json(contatos);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Erro ao listar contatos.' });
+//   }
+// };
+
+// export const searchContato = async (req, res) => {
+//   const { q } = req.query;
+//   try {
+//     const contatos = await searchContatos(q);
+//     res.json(contatos);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Erro na busca de contatos.' });
+//   }
+// };
+
+// export const editContato = async (req, res) => {
+//   const { id } = req.params;
+//   const { nome, idade, telefones } = req.body;
+//   try {
+//     await updateContato(id, nome, idade, telefones);
+//     res.json({ message: 'Contato atualizado com sucesso!' });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Erro ao atualizar contato.' });
+//   }
+// };
+
+// export const removeContato = async (req, res) => {
+//   const { id } = req.params;
+//   try {
+//     const nome = await deleteContato(id);
+//     if (nome) {
+//       const logMsg = `[${new Date().toLocaleString()}] Contato "${nome}" (ID ${id}) foi excluído.\n`;
+//       fs.appendFileSync('./src/logs/deleteLogs.txt', logMsg);
+//       res.json({ message: 'Contato excluído com sucesso!' });
+//     } else {
+//       res.status(404).json({ error: 'Contato não encontrado.' });
+//     }
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Erro ao excluir contato.' });
+//   }
+// };
+
+import fs from "fs";
 import {
   createContato,
   getContatos,
   searchContatos,
   updateContato,
-  deleteContato
-} from '../models/contatoModel.js';
+  deleteContato,
+} from "../models/contatoModel.js";
 
 export const addContato = async (req, res) => {
-  const { nome, idade, telefones } = req.body;
   try {
+    const { nome, idade, telefones } = req.body;
+
+    if (!nome || !idade) {
+      return res
+        .status(400)
+        .json({ error: "Nome e idade são obrigatórios." });
+    }
+
     const id = await createContato(nome, idade, telefones);
-    res.status(201).json({ message: 'Contato criado com sucesso!', id });
+
+    console.log(`[OK] Contato criado com sucesso! ID: ${id}`);
+
+    res.status(201).json({ message: "Contato criado com sucesso!", id });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Erro ao criar contato.' });
+    console.error("[ERRO] Falha ao criar contato:", error);
+    res.status(500).json({ error: "Erro interno ao criar contato." });
   }
 };
 
 export const listContatos = async (req, res) => {
   try {
     const contatos = await getContatos();
-    res.json(contatos);
+
+    console.log(`[OK] ${contatos.length} contatos listados com sucesso.`);
+
+    res.status(200).json(contatos);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Erro ao listar contatos.' });
+    console.error("[ERRO] Falha ao listar contatos:", error);
+    res.status(500).json({ error: "Erro interno ao listar contatos." });
   }
 };
 
 export const searchContato = async (req, res) => {
-  const { q } = req.query;
   try {
+    const { q } = req.query;
+
+    if (!q || q.trim() === "") {
+      return res
+        .status(400)
+        .json({ error: "Informe um termo de busca (q) válido." });
+    }
+
     const contatos = await searchContatos(q);
-    res.json(contatos);
+
+    console.log(`[OK] Busca concluída: ${contatos.length} resultado(s) para "${q}"`);
+
+    res.status(200).json(contatos);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Erro na busca de contatos.' });
+    console.error("[ERRO] Falha na busca de contatos:", error);
+    res.status(500).json({ error: "Erro interno ao buscar contatos." });
   }
 };
 
 export const editContato = async (req, res) => {
-  const { id } = req.params;
-  const { nome, idade, telefones } = req.body;
   try {
-    await updateContato(id, nome, idade, telefones);
-    res.json({ message: 'Contato atualizado com sucesso!' });
+    const { id } = req.params;
+    const { nome, idade, telefones } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ error: "ID do contato é obrigatório." });
+    }
+
+    const atualizado = await updateContato(id, nome, idade, telefones);
+
+    if (!atualizado) {
+      return res.status(404).json({ error: "Contato não encontrado." });
+    }
+
+    console.log(`[OK] Contato ID ${id} atualizado com sucesso.`);
+
+    res.status(200).json({ message: "Contato atualizado com sucesso!" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Erro ao atualizar contato.' });
+    console.error("[ERRO] Falha ao atualizar contato:", error);
+    res.status(500).json({ error: "Erro interno ao atualizar contato." });
   }
 };
 
 export const removeContato = async (req, res) => {
-  const { id } = req.params;
   try {
-    const nome = await deleteContato(id);
-    if (nome) {
-      const logMsg = `[${new Date().toLocaleString()}] Contato "${nome}" (ID ${id}) foi excluído.\n`;
-      fs.appendFileSync('./src/logs/deleteLogs.txt', logMsg);
-      res.json({ message: 'Contato excluído com sucesso!' });
-    } else {
-      res.status(404).json({ error: 'Contato não encontrado.' });
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: "ID do contato é obrigatório." });
     }
+
+    const nome = await deleteContato(id);
+
+    if (!nome) {
+      return res.status(404).json({ error: "Contato não encontrado." });
+    }
+
+    const logDir = "./src/logs";
+    if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
+
+    const logMsg = `[${new Date().toLocaleString()}] Contato "${nome}" (ID ${id}) foi excluído.\n`;
+    fs.appendFileSync(`${logDir}/deleteLogs.txt`, logMsg);
+
+    console.log(`[OK] Contato "${nome}" (ID ${id}) excluído com sucesso.`);
+
+    res.status(200).json({ message: "Contato excluído com sucesso!" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Erro ao excluir contato.' });
+    console.error("[ERRO] Falha ao excluir contato:", error);
+    res.status(500).json({ error: "Erro interno ao excluir contato." });
   }
 };

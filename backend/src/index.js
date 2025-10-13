@@ -9,7 +9,13 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type'],
+  })
+);
 
 app.use(express.json());
 
@@ -20,7 +26,7 @@ app.get('/', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+  console.log(`Servidor rodando na porta: http://localhost:${port}`);
 
   testConnection()
     .then(() => console.log('Conexão com o banco testada com sucesso!'))

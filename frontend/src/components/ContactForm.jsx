@@ -1,123 +1,152 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { PlusCircle, Trash2 } from "lucide-react";
 import { applyPhoneMask } from "../utils/phoneMask";
 
-const API_URL = "http://localhost:3000/api/contatos/criar";
+const API_URL = "http://localhost:5000/api/contatos";
 
 const ContactForm = ({ onSave, onClose, contactToEdit }) => {
-  const [name, setName] = useState("");
-  const [age, setAge] = useState("");
-  const [phones, setPhones] = useState([""]);
-  const [error, setError] = useState("");
+  const [nome, setNome] = useState("");
+  const [idade, setIdade] = useState("");
+  const [telefones, setTelefones] = useState([""]);
+  const [erro, setErro] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // --- Pré-carrega dados do contato para edição ---
   useEffect(() => {
     if (contactToEdit) {
-      setName(contactToEdit.nome);
-      setAge(contactToEdit.idade.toString());
-      setPhones(
-        contactToEdit.telefones?.length > 0 ? contactToEdit.telefones : [""]
+      setNome(contactToEdit.nome || "");
+      setIdade(contactToEdit.idade?.toString() || "");
+      setTelefones(
+        contactToEdit.telefones?.length > 0
+          ? contactToEdit.telefones
+          : [""]
       );
     } else {
-      setName("");
-      setAge("");
-      setPhones([""]);
+      setNome("");
+      setIdade("");
+      setTelefones([""]);
     }
-    setError("");
+    setErro("");
   }, [contactToEdit]);
 
+  // --- Atualiza telefone com máscara ---
   const handlePhoneChange = (index, value) => {
-    const newPhones = [...phones];
-    newPhones[index] = applyPhoneMask(value);
-    setPhones(newPhones);
+    const novosTelefones = [...telefones];
+    novosTelefones[index] = applyPhoneMask(value);
+    setTelefones(novosTelefones);
   };
 
-  const addPhoneInput = () => setPhones([...phones, ""]);
+  // --- Adiciona novo campo de telefone ---
+  const addPhoneInput = () => setTelefones([...telefones, ""]);
 
+  // --- Remove campo de telefone ---
   const removePhoneInput = (index) => {
-    if (phones.length > 1) setPhones(phones.filter((_, i) => i !== index));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const payload = { nome: name, idade: age, telefones: phones };
-    try {
-      if (contatoEdit?.id) {
-        await axios.put(
-          `http://localhost:3000/criarcontato/${contato.id}`,
-          payload
-        );
-        alert("Contato atualizado com sucesso!");
-      } else {
-        await axios.post("http://localhost:3000/api/contatos/buscar", payload);
-        alert("Contato criado com sucesso!");
-      }
-      onSuccess();
-    } catch (err) {
-      console.error(err);
+    if (telefones.length > 1) {
+      setTelefones(telefones.filter((_, i) => i !== index));
     }
   };
 
+  // --- Submissão (criar ou editar) ---
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErro("");
+    setLoading(true);
+
+    const payload = {
+      nome: nome.trim(),
+      idade: parseInt(idade, 10),
+      telefones: telefones.filter((t) => t.trim() !== ""),
+    };
+
+    if (!payload.nome || !payload.idade) {
+      setErro("Nome e idade são obrigatórios.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      if (contactToEdit?.id) {
+        // Atualizar contato existente
+        await axios.put(`${API_URL}/${contactToEdit.id}`, payload);
+        alert("Contato atualizado com sucesso!");
+      } else {
+        // Criar novo contato
+        await axios.post(API_URL, payload);
+        alert("Contato criado com sucesso!");
+      }
+
+      onSave(); // Atualiza a lista principal
+      onClose(); // Fecha o modal
+    } catch (err) {
+      console.error("❌ Erro ao salvar contato:", err);
+      setErro("Erro ao salvar contato. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- Renderização ---
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">
         {contactToEdit ? "Editar Contato" : "Novo Contato"}
       </h2>
 
-      {error && (
-        <p className="text-red-500 text-sm bg-red-50 p-2 rounded-md">{error}</p>
+      {erro && (
+        <p className="text-red-500 text-sm bg-red-50 p-2 rounded-md">
+          {erro}
+        </p>
       )}
 
+      {/* Campo: Nome */}
       <div>
-        <label
-          htmlFor="name"
-          className="block text-sm font-medium text-gray-700"
-        >
+        <label htmlFor="nome" className="block text-sm font-medium text-gray-700">
           Nome
         </label>
         <input
           type="text"
-          id="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          id="nome"
+          value={nome}
+          onChange={(e) => setNome(e.target.value)}
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           required
         />
       </div>
 
+      {/* Campo: Idade */}
       <div>
-        <label
-          htmlFor="age"
-          className="block text-sm font-medium text-gray-700"
-        >
+        <label htmlFor="idade" className="block text-sm font-medium text-gray-700">
           Idade
         </label>
         <input
           type="number"
-          id="age"
-          value={age}
-          onChange={(e) => setAge(e.target.value)}
+          id="idade"
+          value={idade}
+          onChange={(e) => setIdade(e.target.value)}
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           required
         />
       </div>
 
+      {/* Campo: Telefones */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Telefone(s)
         </label>
+
         <div className="space-y-2">
-          {phones.map((phone, index) => (
+          {telefones.map((telefone, index) => (
             <div key={index} className="flex items-center gap-2">
               <input
                 type="tel"
-                value={phone}
+                value={telefone}
                 onChange={(e) => handlePhoneChange(index, e.target.value)}
                 placeholder="(xx) xxxxx-xxxx"
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 required
               />
-              {phones.length > 1 && (
+              {telefones.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removePhoneInput(index)}
@@ -141,6 +170,7 @@ const ContactForm = ({ onSave, onClose, contactToEdit }) => {
         </button>
       </div>
 
+      {/* Botões */}
       <div className="flex justify-end gap-3 pt-4 border-t mt-6">
         <button
           type="button"
@@ -149,6 +179,7 @@ const ContactForm = ({ onSave, onClose, contactToEdit }) => {
         >
           Cancelar
         </button>
+
         <button
           type="submit"
           disabled={loading}
