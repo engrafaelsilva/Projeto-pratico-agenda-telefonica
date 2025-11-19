@@ -1,8 +1,3 @@
-<p align="center">
-  <img src="https://nodejs.org/static/images/logo.svg" width="120" alt="Node Logo" />
-  <img src="https://reactjs.org/static/logo-react.png" width="120" alt="React Logo" />
-</p>
-
 <p align="center"><strong>API REST de Agenda Telefônica</strong> — Gerencie contatos e múltiplos telefones com Node.js, Express e PostgreSQL.</p>
 
 ---
