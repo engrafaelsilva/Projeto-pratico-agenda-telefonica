@@ -1,155 +1,188 @@
-📞 Agenda Telefônica – API REST com Node.js, Express e PostgreSQL
+<p align="center">
+  <img src="https://nodejs.org/static/images/logo.svg" width="120" alt="Node Logo" />
+</p>
 
-Este é um projeto pessoal desenvolvido para aprimorar habilidades em backend, boas práticas de arquitetura, validação de dados e integração com banco relacional.
-A aplicação consiste em uma API REST para gerenciamento de contatos, onde cada contato pode ter múltiplos números de telefone.
+<p align="center"><strong>API REST de Agenda Telefônica</strong> — Gerencie contatos e múltiplos telefones com Node.js, Express e PostgreSQL.</p>
 
-🚀 Tecnologias Utilizadas
+<p align="center">
+  <img src="https://img.shields.io/badge/Node.js-18.x-green" />
+  <img src="https://img.shields.io/badge/Express.js-Framework-blue" />
+  <img src="https://img.shields.io/badge/PostgreSQL-Database-lightblue" />
+  <img src="https://img.shields.io/badge/Swagger-API%20Docs-orange" />
+  <img src="https://img.shields.io/badge/License-MIT-green" />
+</p>
 
-Node.js
+---
 
-Express.js
+## 📞 **Agenda Telefônica – API REST com Node.js, Express e PostgreSQL**
 
-PostgreSQL
+Projeto desenvolvido para aprimorar habilidades em backend, arquitetura limpa, integrações com banco de dados relacional e documentação profissional.
 
-node-postgres (pg)
+A API permite criar, listar, buscar, editar e remover contatos — cada um podendo possuir múltiplos números de telefone.
 
-Swagger UI
+---
 
-Dotenv
+## 🚀 **Tecnologias Utilizadas**
 
-CORS
+* Node.js
+* Express.js
+* PostgreSQL
+* node-postgres (pg)
+* Swagger UI
+* Dotenv
+* CORS
+* Nodemon
 
-Nodemon
+---
 
-🧱 Arquitetura do Projeto
+## 🧱 **Arquitetura do Projeto**
+
+```
 /src
- ├─ controller/   → Lida com validações e respostas HTTP
- ├─ models/       → Querys SQL e operações no banco
- ├─ database/     → Conexão com o PostgreSQL
+ ├─ controller/   → Validações e respostas HTTP
+ ├─ models/       → SQL queries e operações no banco
+ ├─ database/     → Conexão com PostgreSQL
  ├─ routes/       → Rotas da API
- ├─ logs/         → Registros de operações sensíveis
- ├─ swagger/      → Configuração e definição do Swagger
+ ├─ logs/         → Registros de exclusões
+ ├─ swagger/      → Configuração do Swagger
  └─ index.js      → Entrada da aplicação
+```
 
-📄 Funcionalidades
+---
 
-Criar contatos
+## 📄 **Funcionalidades**
 
-Listar contatos
+✔ Criar contatos
+✔ Listar contatos
+✔ Buscar por nome ou telefone
+✔ Editar contato
+✔ Remover contato
+✔ Registro de logs em arquivo
+✔ Documentação completa com Swagger
+✔ Validações rígidas de entrada
+✔ Uso de transações e rollback
 
-Buscar por nome ou telefone
+---
 
-Editar contato
+## 🗄️ **Estrutura do Banco de Dados**
 
-Remover contato
+### **Tabela: contato**
 
-Registro de logs de exclusão
+| Campo | Tipo               |
+| ----- | ------------------ |
+| id    | SERIAL PRIMARY KEY |
+| nome  | VARCHAR            |
+| idade | INTEGER            |
 
-Documentação completa com Swagger
+### **Tabela: telefone**
 
-Validações rígidas de entrada
+| Campo     | Tipo         |
+| --------- | ------------ |
+| idContato | INTEGER (FK) |
+| numero    | VARCHAR      |
 
-Uso de transações e rollback no PostgreSQL
+**Relação 1:N** — um contato pode ter vários números de telefone.
 
-🗄️ Estrutura do Banco de Dados
-Tabela: contato
-Campo	Tipo
-id	SERIAL PRIMARY KEY
-nome	VARCHAR
-idade	INTEGER
-Tabela: telefone
-Campo	Tipo
-idContato	INTEGER (FK)
-numero	VARCHAR
+---
 
-Relação 1:N
-(um contato pode ter vários números de telefone).
+## 🛠️ **Como Executar o Projeto**
 
-🛠️ Como Executar o Projeto
-1. Clone o repositório
+### 1. Clone o repositório
+
+```bash
 git clone https://github.com/SEU-USUARIO/NOME-DO-REPOSITORIO.git
+```
 
-2. Instale as dependências
+### 2. Instale as dependências
+
+```bash
 cd backend
 npm install
+```
 
-3. Configure o arquivo .env
+### 3. Configure o arquivo `.env`
 
-Crie um arquivo .env dentro da pasta backend:
+Crie um arquivo `.env` dentro da pasta `backend`:
 
+```
 DB_HOST=seu_host
 DB_USER=seu_usuario
 DB_PASSWORD=sua_senha
 DB_PORT=5432
 DB_DATABASE=seu_banco
 PORT=3000
+```
 
+**O arquivo `.env` está no .gitignore e não vai para o GitHub.**
 
-⚠ O arquivo .env está no .gitignore e não é enviado ao GitHub.
+### 4. Inicie o servidor
 
-4. Inicie o servidor
+```bash
 npm run dev
+```
 
+A API estará disponível em:
+👉 **[http://localhost:3000](http://localhost:3000)**
 
-A API rodará em:
+---
 
-http://localhost:3000
+## 📘 **Documentação com Swagger**
 
-📘 Documentação (Swagger)
+Acesse em:
+👉 **[http://localhost:3000/api-docs/](http://localhost:3000/api-docs/)**
 
-Acesse a documentação completa em:
+Disponível enquanto o servidor estiver rodando.
 
-http://localhost:3000/api-docs/
+---
 
+## 🔥 **Endpoints**
 
-Disponível enquanto a API estiver rodando localmente.
+| Método | Rota                     | Descrição                        |
+| ------ | ------------------------ | -------------------------------- |
+| POST   | /api/criarcontato        | Criar contato                    |
+| GET    | /api/listar              | Listar contatos                  |
+| GET    | /api/buscar?q=valor      | Buscar contato por nome/telefone |
+| PUT    | /api/editar/:id          | Editar contato                   |
+| DELETE | /api/removercontatos/:id | Remover contato                  |
 
-🔥 Endpoints
-Criar contato
-POST /api/criarcontato
+---
 
-Listar contatos
-GET /api/listar
+## 🧪 **Exemplo de JSON para criação**
 
-Buscar contato
-GET /api/buscar?q=valor
-
-Editar contato
-PUT /api/editar/:id
-
-Remover contato
-DELETE /api/removercontatos/:id
-
-🧪 Exemplo de JSON para criação
+```json
 {
   "nome": "João Silva",
   "idade": 28,
   "telefones": ["11988776655", "11944556677"]
 }
+```
 
-📁 Logs
+---
+
+## 📁 **Logs**
 
 Operações de exclusão são registradas em:
 
+```
 /src/logs/deleteLogs.txt
-
+```
 
 Incluindo:
 
-Nome
+* Nome
+* ID
+* Data e horário
 
-ID
+---
 
-Data e horário
+## 📌 **Próximos Passos**
 
-📌 Próximos Passos
+* Implementar autenticação (JWT)
+* Criar frontend completo
+* Deploy do backend
+* Criar testes automatizados
+* Melhorias no Swagger
 
-Implementar autenticação (JWT)
+---
 
-Criar frontend completo
-
-Deploy do backend
-
-Criar testes automatizados
-
-Melhorias no Swagger
+<p align="center">Desenvolvido com 💛 por <strong>Rafa</strong></p>
