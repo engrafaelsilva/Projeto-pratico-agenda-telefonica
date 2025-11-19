@@ -1,16 +1,9 @@
 <p align="center">
   <img src="https://nodejs.org/static/images/logo.svg" width="120" alt="Node Logo" />
+  <img src="https://react.org/static/images/logo.svg" width="120" alt="Node Logo" />
 </p>
 
 <p align="center"><strong>API REST de Agenda Telefônica</strong> — Gerencie contatos e múltiplos telefones com Node.js, Express e PostgreSQL.</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Node.js-18.x-green" />
-  <img src="https://img.shields.io/badge/Express.js-Framework-blue" />
-  <img src="https://img.shields.io/badge/PostgreSQL-Database-lightblue" />
-  <img src="https://img.shields.io/badge/Swagger-API%20Docs-orange" />
-  <img src="https://img.shields.io/badge/License-MIT-green" />
-</p>
 
 ---
 
