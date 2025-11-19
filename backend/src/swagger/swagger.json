@@ -1,0 +1,155 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API Agenda Telefônica",
+    "version": "1.0.0",
+    "description": "Documentação da API de gerenciamento de contatos"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "tags": [
+    { "name": "Contatos", "description": "Operações relacionadas aos contatos" }
+  ],
+  "components": {
+    "schemas": {
+      "ContatoInput": {
+        "type": "object",
+        "required": ["nome", "idade"],
+        "properties": {
+          "nome": { "type": "string" },
+          "idade": { "type": "integer" },
+          "telefones": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "example": {
+          "nome": "João Silva",
+          "idade": 30,
+          "telefones": ["11999998888", "11977776666"]
+        }
+      },
+      "Contato": {
+        "allOf": [
+          { "$ref": "#/components/schemas/ContatoInput" },
+          {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer" }
+            }
+          }
+        ]
+      }
+    }
+  },
+
+  "paths": {
+    "/api/criarcontato": {
+      "post": {
+        "tags": ["Contatos"],
+        "summary": "Cria um novo contato",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ContatoInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Contato criado com sucesso" },
+          "400": { "description": "Erro de validação" }
+        }
+      }
+    },
+
+    "/api/listar": {
+      "get": {
+        "tags": ["Contatos"],
+        "summary": "Lista todos os contatos",
+        "responses": {
+          "200": {
+            "description": "Lista de contatos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Contato" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/api/buscar": {
+      "get": {
+        "tags": ["Contatos"],
+        "summary": "Busca contato por nome ou telefone",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Termo de busca"
+          }
+        ],
+        "responses": {
+          "200": { "description": "Resultado da busca" },
+          "400": { "description": "Parâmetro inválido" }
+        }
+      }
+    },
+
+    "/api/editar/{id}": {
+      "put": {
+        "tags": ["Contatos"],
+        "summary": "Atualiza um contato",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ContatoInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Contato atualizado" },
+          "404": { "description": "Contato não encontrado" }
+        }
+      }
+    },
+
+    "/api/removercontatos/{id}": {
+      "delete": {
+        "tags": ["Contatos"],
+        "summary": "Remove um contato",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Contato removido" },
+          "404": { "description": "Contato não encontrado" }
+        }
+      }
+    }
+  }
+}

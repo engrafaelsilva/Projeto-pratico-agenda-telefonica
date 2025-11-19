@@ -112,11 +112,15 @@ export const deleteContato = async (id) => {
   try {
     await client.query('BEGIN');
     await client.query('DELETE FROM telefone WHERE idcontato=$1', [id]);
+
     const result = await client.query('DELETE FROM contato WHERE id=$1 RETURNING nome', [id]);
+
     await client.query('COMMIT');
+
     return result.rows[0]?.nome;
   } catch (error) {
     await client.query('ROLLBACK');
+
     throw error;
   } finally {
     client.release();

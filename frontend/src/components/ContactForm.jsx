@@ -1,26 +1,24 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { useState, useEffect } from "react";
 import { PlusCircle, Trash2 } from "lucide-react";
 import { applyPhoneMask } from "../utils/phoneMask";
+import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/contatos";
+const API_URL = "http://localhost:3000/api/";
 
 const ContactForm = ({ onSave, onClose, contactToEdit }) => {
   const [nome, setNome] = useState("");
   const [idade, setIdade] = useState("");
   const [telefones, setTelefones] = useState([""]);
   const [erro, setErro] = useState("");
+  const [sucesso, setSucesso] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // --- Pré-carrega dados do contato para edição ---
   useEffect(() => {
     if (contactToEdit) {
       setNome(contactToEdit.nome || "");
       setIdade(contactToEdit.idade?.toString() || "");
       setTelefones(
-        contactToEdit.telefones?.length > 0
-          ? contactToEdit.telefones
-          : [""]
+        contactToEdit.telefones?.length > 0 ? contactToEdit.telefones : [""]
       );
     } else {
       setNome("");
@@ -28,29 +26,27 @@ const ContactForm = ({ onSave, onClose, contactToEdit }) => {
       setTelefones([""]);
     }
     setErro("");
+    setSucesso("");
   }, [contactToEdit]);
 
-  // --- Atualiza telefone com máscara ---
   const handlePhoneChange = (index, value) => {
     const novosTelefones = [...telefones];
     novosTelefones[index] = applyPhoneMask(value);
     setTelefones(novosTelefones);
   };
 
-  // --- Adiciona novo campo de telefone ---
   const addPhoneInput = () => setTelefones([...telefones, ""]);
 
-  // --- Remove campo de telefone ---
   const removePhoneInput = (index) => {
     if (telefones.length > 1) {
       setTelefones(telefones.filter((_, i) => i !== index));
     }
   };
 
-  // --- Submissão (criar ou editar) ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErro("");
+    setSucesso("");
     setLoading(true);
 
     const payload = {
@@ -66,27 +62,27 @@ const ContactForm = ({ onSave, onClose, contactToEdit }) => {
     }
 
     try {
-      if (contactToEdit?.id) {
-        // Atualizar contato existente
-        await axios.put(`${API_URL}/${contactToEdit.id}`, payload);
-        alert("Contato atualizado com sucesso!");
+      if (contactToEdit) {
+        await axios.put(`${API_URL}editar/${contactToEdit.id}`, payload);
+        setSucesso("Contato atualizado com sucesso!");
+        onSave(payload);
       } else {
-        // Criar novo contato
-        await axios.post(API_URL, payload);
-        alert("Contato criado com sucesso!");
+        const response = await axios.post(`${API_URL}criarcontato`, payload);
+        setSucesso("Contato cadastrado com sucesso!");
+        onSave(response.data);
       }
 
-      onSave(); // Atualiza a lista principal
-      onClose(); // Fecha o modal
+      setTimeout(() => onClose(), 800);
     } catch (err) {
-      console.error("❌ Erro ao salvar contato:", err);
-      setErro("Erro ao salvar contato. Tente novamente.");
+      console.error("Erro ao salvar contato:", err);
+      setErro(
+        err.response?.data?.message ||
+          "Erro de conexão com o servidor. Verifique se o backend está rodando."
+      );
     } finally {
       setLoading(false);
     }
   };
-
-  // --- Renderização ---
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">
@@ -94,14 +90,20 @@ const ContactForm = ({ onSave, onClose, contactToEdit }) => {
       </h2>
 
       {erro && (
-        <p className="text-red-500 text-sm bg-red-50 p-2 rounded-md">
-          {erro}
+        <p className="text-red-600 text-sm bg-red-50 p-2 rounded-md">{erro}</p>
+      )}
+
+      {sucesso && (
+        <p className="text-green-600 text-sm bg-green-50 p-2 rounded-md">
+          {sucesso}
         </p>
       )}
 
-      {/* Campo: Nome */}
       <div>
-        <label htmlFor="nome" className="block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="nome"
+          className="block text-sm font-medium text-gray-700"
+        >
           Nome
         </label>
         <input
@@ -114,9 +116,11 @@ const ContactForm = ({ onSave, onClose, contactToEdit }) => {
         />
       </div>
 
-      {/* Campo: Idade */}
       <div>
-        <label htmlFor="idade" className="block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="idade"
+          className="block text-sm font-medium text-gray-700"
+        >
           Idade
         </label>
         <input
@@ -129,7 +133,6 @@ const ContactForm = ({ onSave, onClose, contactToEdit }) => {
         />
       </div>
 
-      {/* Campo: Telefones */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Telefone(s)
@@ -170,7 +173,6 @@ const ContactForm = ({ onSave, onClose, contactToEdit }) => {
         </button>
       </div>
 
-      {/* Botões */}
       <div className="flex justify-end gap-3 pt-4 border-t mt-6">
         <button
           type="button"

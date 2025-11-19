@@ -1,0 +1,21 @@
+[14/10/2025, 18:49:19] Contato "Ricardo" (ID 2) foi excluído.
+[14/10/2025, 18:49:54] Contato "Emanuel" (ID 6) foi excluído.[15/10/2025, 00:17:32] Contato "Ricardo" (ID 7) foi excluído.
+[15/10/2025, 07:53:10] Contato "Henrique Oliveira" (ID 9) foi excluído.
+[15/10/2025, 07:55:26] Contato "Everton Silveira" (ID 11) foi excluído.
+[15/10/2025, 08:03:52] Contato "Rafael Silva" (ID 1) foi excluído.
+[15/10/2025, 08:06:06] Contato "Nathalie" (ID 3) foi excluído.
+[15/10/2025, 08:13:31] Contato "Bob" (ID 15) foi excluído.
+[15/10/2025, 08:13:35] Contato "Bob" (ID 16) foi excluído.
+[15/10/2025, 08:14:02] Contato "Bob" (ID 14) foi excluído.
+[15/10/2025, 08:19:04] Contato "João Ferreira" (ID 13) foi excluído.
+[15/10/2025, 08:20:13] Contato "Ricardo" (ID 8) foi excluído.
+[15/10/2025, 08:32:27] Contato "Bob" (ID 17) foi excluído.
+[15/10/2025, 08:34:19] Contato "Bob" (ID 18) foi excluído.
+[15/10/2025, 08:53:34] Contato "Henrique" (ID 20) foi excluído.
+[15/10/2025, 09:02:59] Contato "Henrique" (ID 10) foi excluído.
+[16/10/2025, 19:28:50] Contato "Vinicius" (ID 23) foi excluído.
+[17/10/2025, 11:18:19] Contato "Nathalie" (ID 24) foi excluído.
+[17/10/2025, 20:06:25] Contato "João Ferreira" (ID 5) foi excluído.
+[17/10/2025, 20:07:40] Contato "Everton" (ID 12) foi excluído.
+[19/11/2025, 13:54:28] Contato "Nathalie Silva" (ID 25) foi excluído.
+[19/11/2025, 13:57:23] Contato "Ricardo" (ID 21) foi excluído.

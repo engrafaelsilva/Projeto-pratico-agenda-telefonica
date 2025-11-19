@@ -1,74 +1,3 @@
-// import fs from 'fs';
-// import {
-//   createContato,
-//   getContatos,
-//   searchContatos,
-//   updateContato,
-//   deleteContato
-// } from '../models/contatoModel.js';
-
-// export const addContato = async (req, res) => {
-//   const { nome, idade, telefones } = req.body;
-//   try {
-//     const id = await createContato(nome, idade, telefones);
-//     console.log(`[OK] Contato criado com sucesso! ID: ${id}`);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Erro ao criar contato.' });
-//   }
-// };
-
-// export const listContatos = async (req, res) => {
-//   try {
-//     const contatos = await getContatos(nome, idade, telefones);
-//     res.status(201).json({ message: 'Contatos listados com sucesso!', id });
-//     res.json(contatos);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Erro ao listar contatos.' });
-//   }
-// };
-
-// export const searchContato = async (req, res) => {
-//   const { q } = req.query;
-//   try {
-//     const contatos = await searchContatos(q);
-//     res.json(contatos);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Erro na busca de contatos.' });
-//   }
-// };
-
-// export const editContato = async (req, res) => {
-//   const { id } = req.params;
-//   const { nome, idade, telefones } = req.body;
-//   try {
-//     await updateContato(id, nome, idade, telefones);
-//     res.json({ message: 'Contato atualizado com sucesso!' });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Erro ao atualizar contato.' });
-//   }
-// };
-
-// export const removeContato = async (req, res) => {
-//   const { id } = req.params;
-//   try {
-//     const nome = await deleteContato(id);
-//     if (nome) {
-//       const logMsg = `[${new Date().toLocaleString()}] Contato "${nome}" (ID ${id}) foi excluído.\n`;
-//       fs.appendFileSync('./src/logs/deleteLogs.txt', logMsg);
-//       res.json({ message: 'Contato excluído com sucesso!' });
-//     } else {
-//       res.status(404).json({ error: 'Contato não encontrado.' });
-//     }
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Erro ao excluir contato.' });
-//   }
-// };
-
 import fs from "fs";
 import {
   createContato,
@@ -83,16 +12,19 @@ export const addContato = async (req, res) => {
     const { nome, idade, telefones } = req.body;
 
     if (!nome || !idade) {
-      return res
-        .status(400)
-        .json({ error: "Nome e idade são obrigatórios." });
+      return res.status(400).json({ error: "Nome e idade são obrigatórios." });
     }
 
     const id = await createContato(nome, idade, telefones);
 
     console.log(`[OK] Contato criado com sucesso! ID: ${id}`);
 
-    res.status(201).json({ message: "Contato criado com sucesso!", id });
+    res.status(201).json({
+      id,
+      nome,
+      idade,
+      telefones,
+    });
   } catch (error) {
     console.error("[ERRO] Falha ao criar contato:", error);
     res.status(500).json({ error: "Erro interno ao criar contato." });
@@ -119,7 +51,7 @@ export const searchContato = async (req, res) => {
     if (!q || q.trim() === "") {
       return res
         .status(400)
-        .json({ error: "Informe um termo de busca (q) válido." });
+        .json({ error: "Informe um termo de busca válido!" });
     }
 
     const contatos = await searchContatos(q);
@@ -145,12 +77,17 @@ export const editContato = async (req, res) => {
     const atualizado = await updateContato(id, nome, idade, telefones);
 
     if (!atualizado) {
-      return res.status(404).json({ error: "Contato não encontrado." });
+      res.status(200).json(atualizado);
     }
 
     console.log(`[OK] Contato ID ${id} atualizado com sucesso.`);
 
-    res.status(200).json({ message: "Contato atualizado com sucesso!" });
+    res.status(200).json({
+      id,
+      nome,
+      idade,
+      telefones,
+    });
   } catch (error) {
     console.error("[ERRO] Falha ao atualizar contato:", error);
     res.status(500).json({ error: "Erro interno ao atualizar contato." });

@@ -1,10 +1,12 @@
-import { useState, useMemo } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { useState, useEffect, useMemo } from 'react';
 import { Toaster, toast } from 'sonner';
 import { Plus, Search, BookUser, FileText, Download } from 'lucide-react';
+import axios from 'axios';
 
 import ContactForm from './components/ContactForm';
 import Modal from './components/Modal';
+
+const API_URL = "http://localhost:3000/api/";
 
 function App() {
   const [contacts, setContacts] = useState([]);
@@ -14,26 +16,63 @@ function App() {
   const [logs, setLogs] = useState([]);
   const [showLogs, setShowLogs] = useState(false);
 
-  const handleAddContact = (contactData) => {
-    const newContact = { ...contactData, id: uuidv4() };
-    setContacts([...contacts, newContact]);
+  useEffect(() => {
+    const fetchContacts = async () => {
+      try {
+        const response = await axios.get(`${API_URL}listar`);
+        setContacts(response.data);
+      } catch (error) {
+        console.error("Erro ao carregar contatos:", error);
+        toast.error("Erro ao buscar contatos do servidor.");
+      }
+    };
+    fetchContacts();
+  }, []);
+
+  const handleAddContact = async () => {
+  try {
+    const response = await axios.get(`${API_URL}listar`);
+    setContacts(response.data);
     toast.success('Contato adicionado com sucesso!');
+  } catch (error) {
+      console.error("Erro ao atualizar lista de contatos:", error);
+      toast.error("Contato criado, mas erro ao atualizar lista.");
+    }
   };
 
-  const handleUpdateContact = (updatedContact) => {
-    setContacts(contacts.map(c => c.id === updatedContact.id ? updatedContact : c));
-    toast.success('Contato atualizado com sucesso!');
+  const handleUpdateContact = async (updatedContact) => {
+    try {
+      await axios.put(`${API_URL}editar/${updatedContact.id}`, updatedContact);
+
+      setContacts(
+        contacts.map((c) =>
+          c.id === updatedContact.id ? { ...c, ...updatedContact } : c
+        )
+      );
+
+      toast.success('Contato atualizado com sucesso!');
+    } catch (error) {
+      console.error("Erro ao atualizar contato:", error);
+      toast.error('Erro ao atualizar contato.');
+    }
   };
 
-  const handleDeleteContact = (contactId) => {
+  const handleDeleteContact = async (contactId) => {
     const contactToDelete = contacts.find(c => c.id === contactId);
-    if (contactToDelete) {
-      const confirmation = window.confirm(`Tem certeza que deseja excluir ${contactToDelete.name}?`);
-      if (confirmation) {
+    if (!contactToDelete) return;
+
+    if (window.confirm(`Tem certeza que deseja excluir ${contactToDelete.nome}?`)) {
+      try {
+        await axios.delete(`${API_URL}removercontatos/${contactId}`);
         setContacts(contacts.filter(c => c.id !== contactId));
-        const logEntry = `[${new Date().toLocaleString('pt-BR')}] Contato '${contactToDelete.name}' foi excluído.`;
+        const logEntry = `[${new Date().toLocaleString('pt-BR')}] Contato '${contactToDelete.nome}' foi excluído.`;
         setLogs(prevLogs => [logEntry, ...prevLogs]);
-        toast.error('Contato excluído.');
+        setTimeout(()=>{
+          toast.success('Contato excluído.');
+        }, 500);
+      } catch (error) {
+        console.error("Erro ao excluir contato:", error);
+        toast.error('Erro ao excluir contato. Tente novamente.');
       }
     }
   };
@@ -69,8 +108,8 @@ function App() {
 
   const filteredContacts = useMemo(() => {
     return contacts.filter(contact =>
-      contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contact.phones.some(phone => phone.includes(searchTerm))
+      contact.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.telefones.some(phone => phone.includes(searchTerm))
     );
   }, [contacts, searchTerm]);
 
@@ -143,10 +182,10 @@ function App() {
             {filteredContacts.map(contact => (
               <div key={contact.id} className="bg-white p-5 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col justify-between">
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900">{contact.name}</h3>
-                  <p className="text-gray-500">Idade: {contact.age}</p>
+                  <h3 className="text-xl font-semibold text-gray-900">{contact.nome}</h3>
+                  <p className="text-gray-500">Idade: {contact.idade}</p>
                   <div className="mt-2 space-y-1">
-                    {contact.phones.map((phone, index) => (
+                    {contact.telefones.map((phone, index) => (
                       <p key={index} className="text-gray-700 bg-gray-50 px-2 py-1 rounded-md">{phone}</p>
                     ))}
                   </div>
@@ -167,16 +206,18 @@ function App() {
                 </div>
               </div>
             ))}
-             {(filteredContacts.length === 0 && searchTerm) && (
-                <div className="col-span-1 sm:col-span-2 lg:col-span-3 text-center py-10">
-                    <p className="text-gray-500">Nenhum contato encontrado para "{searchTerm}".</p>
-                </div>
+
+            {filteredContacts.length === 0 && searchTerm && (
+              <div className="col-span-3 text-center py-10">
+                <p className="text-gray-500">Nenhum contato encontrado para "{searchTerm}".</p>
+              </div>
             )}
-             {(contacts.length === 0) && (
-                <div className="col-span-1 sm:col-span-2 lg:col-span-3 text-center py-10 bg-white rounded-xl shadow-md">
-                    <h3 className="text-lg font-semibold text-gray-700">Sua agenda está vazia</h3>
-                    <p className="text-gray-500 mt-2">Clique em "Novo Contato" para começar a adicionar pessoas.</p>
-                </div>
+
+            {contacts.length === 0 && !searchTerm && (
+              <div className="col-span-3 text-center py-10 bg-white rounded-xl shadow-md">
+                <h3 className="text-lg font-semibold text-gray-700">Sua agenda está vazia</h3>
+                <p className="text-gray-500 mt-2">Clique em "Novo Contato" para começar a adicionar pessoas.</p>
+              </div>
             )}
           </div>
         </main>
@@ -184,7 +225,13 @@ function App() {
 
       <Modal isOpen={isModalOpen} onClose={closeModal}>
         <ContactForm
-          onSave={editingContact ? handleUpdateContact : handleAddContact}
+          onSave={(contactData) => {
+            if (editingContact) {
+              handleUpdateContact({ ...editingContact, ...contactData });
+            } else {
+              handleAddContact(contactData);
+            }
+          }}
           onClose={closeModal}
           contactToEdit={editingContact}
         />

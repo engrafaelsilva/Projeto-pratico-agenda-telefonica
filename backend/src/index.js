@@ -3,11 +3,14 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import { testConnection } from './database/configDb.js';
 import contatoRoutes from './routes/contatoRoutes.js';
+import swaggerDocs from "./swagger/swagger.js";
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+swaggerDocs(app);
 
 app.use(
   cors({
@@ -27,6 +30,7 @@ app.get('/', (req, res) => {
 
 app.listen(port, () => {
   console.log(`Servidor rodando na porta: http://localhost:${port}`);
+  console.log(`Swagger disponível em: http://localhost:${port}/api-docs`);
 
   testConnection()
     .then(() => console.log('Conexão com o banco testada com sucesso!'))
