@@ -1,5 +1,3 @@
-<p align="center"><strong>API REST de Agenda Telefônica</strong> — Gerencie contatos e múltiplos telefones com Node.js, Express e PostgreSQL.</p>
-
 ---
 
 ## 📞 **Agenda Telefônica – API REST com Node.js, Express e PostgreSQL**
